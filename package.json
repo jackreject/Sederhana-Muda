@@ -1,0 +1,38 @@
+{
+  "name": "control-piutang-web",
+  "version": "4.0.3",
+  "description": "SPG Controlling Piutang",
+  "author": "Hasan Ali Zacky",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.spg.controlpiutang",
+    "productName": "SPG Controlling Piutang",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "html_version/**/*",
+      "main.js"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "html_version/assets/logo-spg.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false
+    }
+  },
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "firebase": "^12.15.0"
+  }
+}

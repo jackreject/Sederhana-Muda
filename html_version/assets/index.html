@@ -1,0 +1,647 @@
+  <!doctype html>
+  <html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css?v=5" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <img src="images/logo-spg.png" alt="Logo Sederhana Putra Group">
+        </div>
+        <div>
+          <title>SPG Control Piutang</title>
+          <h1>Sederhana Putra Group</h1>
+          <h2>Controlling Piutang</h2>
+          <p>Monitoring Cabang • Customer •<br>Aging • Penagihan</p>
+        </div>
+      </div>
+
+      <nav class="nav">
+    <button class="nav-btn active" data-page="dashboard"><span>🏠</span>Dashboard</button>
+    <button class="nav-btn" data-page="import"><span>☁️</span>Import Zahir</button>
+    <button class="nav-btn" data-page="detail"><span>📄</span>Detail Piutang</button>
+    <button class="nav-btn" data-page="mapping"><span>👤</span>Mapping PJ Piutang</button>
+    <button class="nav-btn" data-page="kepala"><span>👔</span>Master Kepala Cabang</button>
+    <button class="nav-btn" data-page="masterpj"><span>👥</span>Master PJ</button>
+    <button class="nav-btn" data-page="master"><span>🏢</span>Master Limit</button>
+    <button class="nav-btn" data-page="risk"><span>⚠️</span>Monitoring Risiko</button>
+<button class="nav-btn" data-page="import-history"><span>🧾</span>Riwayat Import</button>
+<button class="nav-btn" id="exitAppBtn" type="button">
+  <span>🚪</span>Keluar Aplikasi
+</button>
+
+  </nav>
+
+      <section class="side-card">
+        <h3>Komposisi Aging</h3>
+        <div class="aging-row bjt"><span>BJT &lt;30</span><b id="sideBjt">Rp 0</b></div>
+        <div class="aging-row tw"><span>TW 30-60</span><b id="sideTw">Rp 0</b></div>
+        <div class="aging-row r1"><span>R1 60-90</span><b id="sideR1">Rp 0</b></div>
+        <div class="aging-row bd"><span>BD &gt;90</span><b id="sideBd">Rp 0</b></div>
+      </section>
+
+      <section class="side-card mini-info">
+        <div class="mini-icon">📅</div>
+        <p>Terakhir Import</p>
+        <b id="lastImportDate">-</b>
+        <p>Cabang Terimport</p>
+        <b id="lastImportCabang">0</b>
+      </section>
+    </aside>
+
+    <main class="main">
+      <section class="page active" id="page-dashboard">
+        <div class="topbar">
+    <div>
+      <h2>Dashboard Controlling Piutang</h2>
+      <p>Dashboard kosong sebelum import. Setelah CSV Zahir masuk, data otomatis hidup.</p>
+    </div>
+
+    <div style="display:flex;gap:10px;">
+      <button id="uploadCloudBtn" class="mini-btn">
+  ☁️ Upload Semua Data
+</button>
+      <button id="syncNowBtn" class="mini-btn">
+        ☁️ Sinkronkan Data
+      </button>
+
+      <button class="reset-btn" id="resetDataBtn">
+        ⟳ Reset Data
+      </button>
+    </div>
+  </div>
+
+        <section class="hero">
+          <div>
+            <span>Sederhana Putra Group</span>
+            <h3>Kontrol piutang seluruh cabang SDR.</h3>
+            <p>Prioritas tagih hanya menampilkan customer BD dan yang melebihi limit.</p>
+          </div>
+          <div class="hero-pill" id="importStatus">Belum Ada Import</div>
+        </section>
+
+        <section class="filters">
+          <label>Cabang<select id="filterCabang"><option value="ALL">ALL</option></select></label>
+          <label>Kepala Cabang<select id="filterKepala"><option value="ALL">ALL</option></select></label>
+          <label>Penanggung Jawab<select id="filterSalesman"><option value="ALL">ALL</option></select></label>
+          <label>Customer<select id="filterCustomer"><option value="ALL">ALL CUSTOMER</option></select></label>
+          <label>Aging<select id="filterAging"><option value="ALL">ALL</option><option value="BJT">BJT &lt;30</option><option value="TW">TW 30-60</option><option value="R1">R1 60-90</option><option value="BD">BD &gt;90</option></select></label>
+          <label>Tahun<select id="filterTahun"><option value="ALL">ALL</option></select></label>
+          <label>Dari Tanggal<input id="filterDari" type="date"></label>
+          <label>Sampai Tanggal<input id="filterSampai" type="date"></label>
+          <button id="applyFilterBtn">Filter</button>
+        </section>
+
+        <section class="kpis">
+          <article class="kpi total"><span>Total Piutang</span><strong id="kpiTotal">Rp 0</strong></article>
+          <article class="kpi danger"><span>BD &gt;90 Hari</span><strong id="kpiBd">Rp 0</strong></article>
+          <article class="kpi warn"><span>Over Limit</span><strong id="kpiOver">Rp 0</strong></article>
+          <article class="kpi customer"><span>Customer</span><strong id="kpiCustomer">0</strong></article>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Prioritas Tagih, BD &gt;90 & Over Limit</h3>
+            <div class="search-wrap"><input id="searchPriority" placeholder="Cari customer/cabang..." /><span>⌕</span></div>
+          </div>
+          <div class="section-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Customer</th><th>Cabang</th><th>BJT &lt;30</th><th>TW 30-60</th><th>R1 60-90</th><th>BD &gt;90</th><th>Total</th><th>Limit</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="priorityBody"><tr><td colspan="9" class="empty">Belum ada data</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="page" id="page-import">
+        <div class="topbar"><div><h2>Import Zahir</h2><p>Upload CSV laporan Piutang Usaha per Mata Uang - Rincian.</p></div></div>
+        <section class="panel import-box">
+          <label class="file-drop">
+            <input type="file" id="csvFile" accept=".csv,text/csv" />
+            <span>Pilih CSV Zahir</span>
+            <small>Cabang otomatis dibaca dari isi file. Kalau tidak terbaca, nama file dipakai.</small>
+          </label>
+          <div class="import-preview">
+            <p><b>Cabang Terdeteksi:</b> <span id="detectedCabang">-</span></p>
+            <p><b>Jumlah Baris:</b> <span id="detectedRows">0</span></p>
+            <p><b>Total Piutang:</b> <span id="detectedTotal">Rp 0</span></p>
+            <button id="processImportBtn">Proses Import</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="page" id="page-detail">
+        <div class="topbar"><div><h2>Detail Piutang</h2><p>Tabel faktur lengkap. Pencarian bisa customer, faktur, cabang, tanggal, tahun, aging, PJ, dan nominal.</p></div></div>
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Daftar Faktur</h3>
+            <div class="detail-mini-filter">
+    <input id="detailCabangSearch" list="detailCabangOptions" placeholder="Cari / pilih cabang">
+    <datalist id="detailCabangOptions"></datalist>
+
+    <input id="detailCustomerSearch" list="detailCustomerOptions" placeholder="Cari / pilih customer">
+    <datalist id="detailCustomerOptions"></datalist>
+  </div>
+            <div class="search-wrap"><input id="searchDetail" placeholder="Cari faktur/customer/nominal..." /><span>⌕</span></div>
+          </div>
+          <div class="section-scroll tall">
+            <table>
+              <thead>
+                <tr><th>Customer</th><th>Cabang</th><th>No Faktur</th><th>Tanggal</th><th>Tahun</th><th>Aging</th><th>Nominal</th><th>PJ</th></tr>
+              </thead>
+              <tbody id="detailBody"><tr><td colspan="8" class="empty">Belum ada data</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+    <section class="page" id="page-mapping">
+    <div class="topbar">
+      <div>
+        <h2>Mapping PJ Piutang</h2>
+      </div>
+    </div>
+
+    <section class="panel mapping-panel">
+
+      <div class="mapping-filter-card">
+        <div class="mapping-filters">
+  <select id="mappingCabang">
+  <option value="ALL">ALL CABANG</option>
+</select>
+
+<select id="mappingPJType">
+  <option value="ALL">ALL JENIS PJ</option>
+</select>
+
+<input id="mappingSearch" placeholder="Cari customer / faktur / aging / nominal..." />
+          <select id="mappingYear">
+            <option value="ALL">ALL TAHUN</option>
+          </select>
+
+<button id="resetMappingFilterBtn"
+        type="button"
+        class="ghost small-btn">
+  Reset
+</button>
+
+<button id="mappingNoPjBtn"
+        type="button"
+        class="ghost small-btn">
+  Belum Ada PJ
+</button>
+
+        </div>
+      </div>
+
+      <div class="mapping-layout mapping-layout-pro">
+        <div class="mapping-left">
+          <div class="mapping-card-head">
+            <h3>Daftar Customer</h3>
+            <span id="mappingCustomerCount">0 Customer</span>
+          </div>
+          <div id="customerList" class="customer-list">
+            <div class="empty-card">Belum ada data</div>
+          </div>
+        </div>
+
+        <div class="mapping-right">
+          <div class="selected-customer-box">
+            <div>
+              <small>Customer terpilih</small>
+              <h3 id="selectedCustomerTitle">Detail Nota Customer</h3>
+              <p id="selectedCustomerMeta">Klik customer di kiri untuk melihat faktur.</p>
+            </div>
+          </div>
+
+          <div class="assign-row assign-row-pro">
+            <select id="salesmanInput">
+  <option value="">Cari / pilih Penanggung Jawab</option>
+</select>
+            <button id="assignBtn">Assign Nota Terpilih</button>
+          </div>
+
+          <div class="section-scroll tall mapping-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="checkAllNota"></th>
+                  <th>No Faktur</th>
+                  <th>Tanggal</th>
+                  <th>Aging</th>
+                  <th>Nominal</th>
+                </tr>
+              </thead>
+              <tbody id="notaBody">
+                <tr><td colspan="5" class="empty">Klik customer dulu</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </section>
+      <section class="page" id="page-kepala">
+
+    <div class="topbar">
+      <div>
+        <h2>Master Kepala Cabang</h2>
+        <p>Master kepala cabang dan mapping cabang.</p>
+      </div>
+    </div>
+
+    <section class="panel">
+
+      <div class="panel-head">
+        <h3>Tambah Kepala Cabang</h3>
+        <span class="soft-badge" id="kepalaCount">0 Kepala Cabang</span>
+      </div>
+
+      <div class="pj-form">
+        <input id="kepalaNameInput" placeholder="Contoh: AGUS / RIZAL / BUDI">
+        <button id="saveKepalaBtn">Simpan Kepala Cabang</button>
+      </div>
+
+      <div class="section-scroll">
+        <table class="pj-table">
+          <thead>
+            <tr>
+              <th>Nama Kepala Cabang</th>
+              <th>Jumlah Cabang</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="kepalaBody">
+            <tr>
+              <td colspan="3" class="empty">Belum ada Kepala Cabang</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <section class="panel">
+    <div class="panel-head">
+      <h3>History Kepala Cabang</h3>
+      <span class="soft-badge" id="kepalaHistoryCount">0 History</span>
+    </div>
+
+    <div class="pj-form">
+      <select id="histCabangInput"></select>
+      <select id="histKepalaInput"></select>
+      <input id="histDariInput" type="date">
+      <input id="histSampaiInput" type="date">
+      <button id="saveKepalaHistoryBtn">Simpan History</button>
+    </div>
+
+    <div class="section-scroll tall">
+      <table>
+        <thead>
+          <tr>
+            <th>Cabang</th>
+            <th>Kepala Cabang</th>
+            <th>Dari</th>
+            <th>Sampai</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="kepalaHistoryBody">
+          <tr>
+            <td colspan="5" class="empty">Belum ada history kepala cabang</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+    <section class="panel">
+
+      <div class="panel-head">
+        <h3>Mapping Cabang → Kepala Cabang</h3>
+      </div>
+
+      <div class="section-scroll tall">
+        <table>
+          <thead>
+            <tr>
+              <th>Cabang</th>
+              <th>Kepala Cabang</th>
+            </tr>
+          </thead>
+          <tbody id="kepalaMappingBody">
+            <tr>
+              <td colspan="2" class="empty">Belum ada data cabang</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </section>
+
+      <section class="page" id="page-masterpj">
+        <div class="topbar"><div><h2>Master Penanggung Jawab</h2><p>.</p></div></div>
+        <section class="panel pj-master-panel">
+                  <div class="panel-head">
+            <h3>Master Jenis PJ</h3>
+            <span class="soft-badge" id="pjTypeCount">0 Jenis</span>
+          </div>
+          <div class="pj-form pj-type-form">
+            <input id="pjTypeNameInput" placeholder="Contoh: SALES / MANDOR / ADMIN TAGIH / KOLEKTOR" />
+            <button id="savePjTypeBtn">Tambah Jenis PJ</button>
+          </div>
+          <div class="section-scroll pj-type-scroll">
+            <table class="pj-table">
+              <thead><tr><th>Jenis PJ</th><th>Dipakai</th><th>Aksi</th></tr></thead>
+              <tbody id="pjTypeBody"><tr><td colspan="3" class="empty">Belum ada Jenis PJ</td></tr></tbody>
+            </table>
+          </div>
+
+          <div class="panel-head pj-head-gap">
+  <h3>Mapping Cabang → Jenis PJ</h3>
+  <span class="soft-badge" id="branchPJTypeCount">0 Cabang</span>
+</div>
+
+<div class="pj-form">
+  <select id="branchPJCabangInput">
+    <option value="">Pilih Cabang</option>
+  </select>
+
+  <select id="branchPJTypeInput">
+    <option value="">Pilih Jenis PJ</option>
+  </select>
+
+  <button id="saveBranchPJTypeBtn" type="button">Simpan Mapping</button>
+</div>
+
+<div class="section-scroll">
+  <table class="pj-table">
+    <thead>
+      <tr>
+        <th>Cabang</th>
+        <th>Jenis PJ</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="branchPJTypeBody">
+      <tr><td colspan="3" class="empty">Belum ada mapping cabang</td></tr>
+    </tbody>
+  </table>
+</div>
+
+          <div class="panel-head pj-head-gap"><h3>Tambah Penanggung Jawab</h3></div>
+          <div class="pj-form">
+            <input id="pjNameInput" placeholder="Contoh: Penanggung Jawab" />
+            <select id="pjTypeInput"><option value="">Buat Jenis PJ dulu</option></select>
+            <button id="savePjBtn">Simpan PJ</button>
+          </div>
+          <div class="section-scroll tall">
+            <table class="pj-table">
+              <thead><tr><th>Nama Penanggung Jawab</th><th>Jenis PJ</th><th>Total Nota</th><th>Total Piutang</th><th>BD</th><th>Aksi</th></tr></thead>
+              <tbody id="pjBody"><tr><td colspan="6" class="empty">Belum ada PJ</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="page" id="page-master">
+        <div class="topbar"><div><h2>Master PJ & Limit</h2><p>Satu tempat untuk atur model limit cabang, Penanggung Jawab, limit customer, dan limit gabungan PJ.</p></div></div>
+
+        <section class="master-grid" id="masterLimitInfo"></section>
+        <section class="master-grid cabang-grid" id="masterCabangCards"></section>
+
+        <section class="panel branch-model-panel">
+          <div class="panel-head">
+            <h3>Model Limit Cabang</h3>
+            <span class="soft-badge">SPM per customer, Cabang per PJ</span>
+          </div>
+          <div class="branch-model-form">
+            <input id="branchModelCabang" list="branchOptions" placeholder="Pilih / ketik cabang" autocomplete="off" />
+            <datalist id="branchOptions"></datalist>
+            <select id="branchModelType">
+              <option value="CUSTOMER">Limit Per Customer / Toko</option>
+              <option value="PJ">Limit Gabungan Per PJ / Mandor</option>
+            </select>
+            <button id="saveBranchModelBtn" type="button">Simpan Model Cabang</button>
+          </div>
+          <div class="section-scroll branch-model-scroll">
+            <table>
+              <thead><tr><th>Cabang</th><th>Model Limit</th><th>Catatan</th></tr></thead>
+              <tbody id="branchModelBody"><tr><td colspan="3" class="empty">Belum ada data cabang</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Setting Limit Customer</h3>
+            <div class="search-wrap"><input id="limitSearch" placeholder="Cari customer/cabang/status..." /><span>⌕</span></div>
+          </div>
+
+          <div class="limit-filter-bar">
+            <label>Status Limit
+              <select id="limitStatusFilter">
+                <option value="ALL">SEMUA STATUS</option>
+                <option value="LIMIT_TERISI">LIMIT TERISI</option>
+                <option value="NON_LIMIT">NON LIMIT</option>
+                <option value="OVER_LIMIT">OVER LIMIT</option>
+                <option value="AMAN">AMAN</option>
+              </select>
+            </label>
+            <div class="quick-filter-buttons">
+              <button type="button" class="ghost mini-filter-btn" data-limit-filter="OVER_LIMIT">Over Limit</button>
+              <button type="button" class="ghost mini-filter-btn danger-soft" data-limit-filter="PJ_OVER_LIMIT">PJ Over Limit</button>
+              <button type="button" class="ghost mini-filter-btn" data-limit-filter="MISSING_PJ">Belum Ada PJ</button>
+              <button type="button" class="ghost mini-filter-btn" data-limit-filter="LIMIT_TERISI">Limit Terisi</button>
+              <button type="button" class="ghost mini-filter-btn" data-limit-filter="NON_LIMIT">Non Limit</button>
+              <button type="button" class="ghost mini-filter-btn" data-limit-filter="ALL">Reset</button>
+            </div>
+          </div>
+
+          <div class="master-form master-form-unified">
+            <select id="limitScope">
+              <option value="AUTO">Otomatis Ikuti Model Cabang</option>
+              <option value="CUSTOMER">Limit Customer / Toko</option>
+              <option value="PJ">Limit Gabungan PJ / Mandor</option>
+            </select>
+          <input id="limitCustomer" list="customerOptions" placeholder="Customer / Proyek / Nama PJ" autocomplete="off" />
+  <datalist id="customerOptions"></datalist>
+            <input id="limitPj" list="pjOptions" placeholder="PJ terkait (opsional untuk customer)" autocomplete="off" />
+            <input id="limitValue" placeholder="Masukan Limit" inputmode="numeric" />
+            <button id="saveLimitBtn">Simpan / Update</button>
+          </div>
+
+          <div class="section-scroll tall">
+            <table class="master-table">
+              <thead>
+                <tr>
+                  <th>Customer</th><th>Cabang</th><th>PJ</th><th>Faktur</th><th>Total Piutang</th><th>Limit</th><th>Sisa Limit</th><th>Status</th><th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="limitBody"><tr><td colspan="9" class="empty">Belum ada data</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+
+      <section class="page" id="page-risk">
+        <div class="topbar">
+          <div>
+            <h2>Monitoring Risiko Piutang</h2>
+            <p>Khusus untuk melihat aging piutang. TW dan R1 dipisah, tidak digabung.</p>
+          </div>
+          <button class="reset-btn" id="resetRiskFilterBtn">Reset Filter Risiko</button>
+        </div>
+
+        <section class="filters">
+          <label>Cabang<select id="riskCabang"><option value="ALL">ALL</option></select></label>
+          <label>Kepala Cabang<select id="riskKepala"><option value="ALL">ALL</option></select></label>
+          <label>Penanggung Jawab<select id="riskSalesman"><option value="ALL">ALL</option></select></label>
+          <label>Customer<select id="riskCustomer"><option value="ALL">ALL CUSTOMER</option></select></label>
+          <label>Aging<select id="riskAging"><option value="ALL">SEMUA</option><option value="BJT">BJT &lt;30</option><option value="TW">TW 30-60</option><option value="R1">R1 60-90</option><option value="BD">BD &gt;90</option></select></label>
+          <label>Tahun<select id="riskTahun"><option value="ALL">ALL</option></select></label>
+          <label>Dari Tanggal<input id="riskDari" type="date"></label>
+          <label>Sampai Tanggal<input id="riskSampai" type="date"></label>
+        </section>
+
+        <section class="kpis risk-kpis">
+          <article class="kpi total"><span>Total Piutang</span><strong id="riskTotal">Rp 0</strong></article>
+          <article class="kpi bjt"><span>BJT &lt;30</span><strong id="riskBjt">Rp 0</strong></article>
+          <article class="kpi tw"><span>TW 30-60</span><strong id="riskTw">Rp 0</strong></article>
+          <article class="kpi r1"><span>R1 60-90</span><strong id="riskR1">Rp 0</strong></article>
+          <article class="kpi bd"><span>BD &gt;90</span><strong id="riskBd">Rp 0</strong></article>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h3>Tabel Monitoring Aging</h3>
+            <div class="search-wrap"><input id="riskSearch" placeholder="Cari customer/cabang/nominal/status..." /><span>⌕</span></div>
+          </div>
+          <div class="section-scroll tall">
+            <table class="risk-table">
+              <thead>
+                <tr>
+                  <th>Customer</th><th>Cabang</th><th>BJT &lt;30</th><th>TW 30-60</th><th>R1 60-90</th><th>BD &gt;90</th><th>Total</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="riskBody"><tr><td colspan="8" class="empty">Belum ada data risiko</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+<section class="page" id="page-import-history">
+  <div class="topbar">
+    <div>
+      <h2>Riwayat Import</h2>
+      <p>Audit detail perubahan piutang dari setiap proses import Zahir.</p>
+    </div>
+    <button class="reset-btn" id="clearImportHistoryBtn">Hapus Riwayat</button>
+  </div>
+
+  <section class="filters">
+    <label>Cabang
+      <select id="historyCabangFilter"><option value="ALL">ALL</option></select>
+    </label>
+
+    <label>Status
+      <select id="historyStatusFilter">
+        <option value="ALL">SEMUA STATUS</option>
+        <option value="PIUTANG_BARU">PIUTANG BARU</option>
+        <option value="SUDAH_BAYAR">SUDAH BAYAR / HILANG</option>
+        <option value="NOMINAL_TURUN">NOMINAL TURUN</option>
+        <option value="NOMINAL_NAIK">NOMINAL NAIK / PERLU CEK</option>
+      </select>
+    </label>
+
+    <label>Pencarian
+      <input id="historySearchInput" placeholder="Cari customer / faktur / cabang">
+    </label>
+  </section>
+
+  <section class="kpis risk-kpis">
+    <article class="kpi total"><span>Total Import</span><strong id="histTotalImport">0</strong></article>
+    <article class="kpi bjt"><span>Piutang Baru</span><strong id="histPiutangBaru">Rp 0</strong></article>
+    <article class="kpi danger"><span>Sudah Bayar / Hilang</span><strong id="histSudahBayar">Rp 0</strong></article>
+    <article class="kpi warn"><span>Nominal Turun</span><strong id="histNominalTurun">Rp 0</strong></article>
+    <article class="kpi tw"><span>Nominal Naik</span><strong id="histNominalNaik">Rp 0</strong></article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h3>Daftar Riwayat Import</h3>
+      <span class="soft-badge" id="historyListCount">0 Import</span>
+    </div>
+    <div id="importHistoryList" class="import-history-list">
+      <div class="empty">Belum ada riwayat import</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h3>Detail Perubahan Faktur</h3>
+      <span class="soft-badge" id="historyDetailCount">0 Faktur</span>
+    </div>
+
+    <div class="section-scroll tall">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal Import</th>
+            <th>Status</th>
+            <th>Cabang</th>
+            <th>Customer</th>
+            <th>No Faktur</th>
+            <th>Nominal Lama</th>
+            <th>Nominal Baru</th>
+            <th>Selisih</th>
+            <th>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody id="importHistoryBody">
+          <tr><td colspan="9" class="empty">Belum ada detail perubahan</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
+       </main>
+
+
+    <div class="invoice-modal" id="invoiceModal" aria-hidden="true">
+      <div class="invoice-backdrop" data-close-invoice></div>
+      <section class="invoice-box">
+        <div class="invoice-head">
+          <div>
+            <small>Detail Faktur Customer</small>
+            <h3 id="invoiceCustomerTitle">-</h3>
+            <p id="invoiceCustomerMeta">-</p>
+          </div>
+          <button class="invoice-close" data-close-invoice>×</button>
+        </div>
+        <div class="section-scroll invoice-scroll">
+          <table>
+            <thead>
+              <tr><th>No Faktur</th><th>Cabang</th><th>Tanggal</th><th>Aging</th><th>Nominal</th><th>PJ</th></tr>
+            </thead>
+            <tbody id="invoiceBody"><tr><td colspan="6" class="empty">Klik customer dulu</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+     <script src="app.js?v=4.0.3"></script>
+  </body>
+  </html>
